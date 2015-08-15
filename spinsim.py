@@ -8,20 +8,20 @@
 # gnuplot-py from https://github.com/yuyichao/gnuplot-py
 
 import sfml as sf			# Graphics library
-import Gnuplot, Gnuplot.funcutils	# Graphing library
+#import Gnuplot, Gnuplot.funcutils	# Graphing library
 import math
 import fractions
 import time
 import argparse
 
 # Simulation settings
-radius = 160	# Radius of platter
+radius = 100	# Radius of platter
 speed = 40	# Speed in mm/s
 # Stepping increment for each axis (radians/step)
-# = 2π radians / ( motor steps/revolution * gear ratio)
-# = 2π radians / ( 200 steps/rev * (385 teeth / 18 teeth))
+# = 2*Pi radians / ( motor steps/revolution * gear ratio)
+# = 2*Pi radians / ( 200 steps/rev * (385 teeth / 18 teeth))
 th1_inc = 2*math.pi / (200*(385/18))	# Platter step increment in radians
-# = 2π radians / ( 200 steps/rev * (450 teeth / 18 teeth))
+# = 2*Pi radians / ( 200 steps/rev * (450 teeth / 18 teeth))
 th2_inc = 2*math.pi / (200*(450/18))	# Arm step increment in radians
 
 # Graphics settings
@@ -61,8 +61,8 @@ Vy = 0						# Velocity component on Y axis
 start_time = 0					# Starting global time
 t = 0						# Time since start_time
 dt = 0.01					# Time increment (in seconds) when using fake_time
-next_time1 = 0					# Time of next θ₁ step
-next_time2 = 0					# Time of next θ₂ step
+next_time1 = 0					# Time of next Theta_1 step
+next_time2 = 0					# Time of next Theta_2 step
 x_list = []					# History of all t,x points for graphing
 y_list = []
 th1_list = []
@@ -89,17 +89,17 @@ window.draw(circle)
 window.display()
 
 # Initialize Graphing
-cart_graph = Gnuplot.Gnuplot()
-cart_graph.title("Cartesian Coordinates")
-cart_graph.xlabel("Time (seconds)")
-cart_graph.ylabel("Position (mm)")
-cart_graph("set style data lines")		# Set graph style
+#cart_graph = Gnuplot.Gnuplot()
+#cart_graph.title("Cartesian Coordinates")
+#cart_graph.xlabel("Time (seconds)")
+#cart_graph.ylabel("Position (mm)")
+#cart_graph("set style data lines")		# Set graph style
 #cart_graph.set_range('yrange',(-radius,radius))
-bipol_graph = Gnuplot.Gnuplot()
-bipol_graph.title("Bipolar Coordinates")
-bipol_graph.xlabel("Time (seconds)")
-bipol_graph.ylabel("Angle (Radians)")
-bipol_graph("set style data lines")		# Set graph style
+#bipol_graph = Gnuplot.Gnuplot()
+#bipol_graph.title("Bipolar Coordinates")
+#bipol_graph.xlabel("Time (seconds)")
+#bipol_graph.ylabel("Angle (Radians)")
+#bipol_graph("set style data lines")		# Set graph style
 
 # Convert screen coordinates to simulated machine coordinates
 def screen2cart(screen_x,screen_y):
@@ -133,7 +133,7 @@ def cart2pol(x,y):
 	return theta,r
 	
 # Convert a set of cartesian coordinates (X,Y)
-# into bipolar coordinates (θ₁,θ₂) represented by two angles,
+# into bipolar coordinates (Theta_1,Theta_2) represented by two angles,
 # the angle of the platter and the angle of the arm.
 def cart2bipol(x,y):
 	theta,r = cart2pol(x,y)
@@ -339,13 +339,13 @@ def nextstep_th2():
 		next_time = min(future_times)
 		# Check answer
 		if (abs(th2(next_time)-curr_th2+th2_inc) > th2_inc) and (abs(th2(next_time)-curr_th2-th2_inc) > th2_inc):
-			print(":: θ₂ Discrepancy:",th2(next_time),curr_th2+th2_inc,curr_th2-th2_inc)
+			print(":: Theta_2 Discrepancy:",th2(next_time),curr_th2+th2_inc,curr_th2-th2_inc)
 		return next_time
 	else:
 		# This will cause the main timer to run out
 		# before the axis is moved again
 		return move_time+1
-		print(":: θ₂: No times found")
+		print(":: Theta_2: No times found")
 
 def nextstep_th1():
 	# Find possible times based on current positon +- step increment
@@ -388,12 +388,12 @@ def nextstep_th1():
 		next_time = min(future_times)
 		# Check answer
 		if (abs(th1(next_time)-curr_th1+th1_inc) > th1_inc) and (abs(th1(next_time)-curr_th1-th1_inc) > th1_inc):
-			print(":: θ₁ Discrepancy:",th1(next_time),curr_th1+th1_inc,curr_th1-th1_inc)
+			print(":: Theta_1 Discrepancy:",th1(next_time),curr_th1+th1_inc,curr_th1-th1_inc)
 		return next_time
 	else:
 		# This will cause the main timer to run out
 		# before the axis is moved again
-		print(":: θ₁ No times found")
+		print(":: Theta_1 No times found")
 		return move_time+1
 
 # Draw Center
@@ -471,18 +471,18 @@ while True:
 
 	# GO!
 	# There are two methods used here to determine when an axis should be stepped
-	# For θ₂, we find the future time in which the step must occur and wait until then.
+	# For Theta_2, we find the future time in which the step must occur and wait until then.
 	# This method simulates a timer based interrup on an AVR.
-	# Unfortunately, θ₁ is dependant not only on time but also on θ₂.
+	# Unfortunately, Theta_1 is dependant not only on time but also on Theta_2.
 	# This means we cannot accurately determine the time in the future when it will
 	# need to be stepped.
-	# Thus we must continuously compare the current position of θ₁ with the ideal position.
+	# Thus we must continuously compare the current position of Theta_1 with the ideal position.
 	# If the difference is too great, the step is performed.
 	# This method is completely accurate, but it hogs the CPU.
 	# On the real machine you would want to free CPU time by doing the comparison less frequently.
 	# Perhaps you could tie it to a timer interrupt with a fixed interval.
 	while t < move_time:
-		# Is it time to step θ₂?
+		# Is it time to step Theta_2?
 		if t >= next_time2:
 			set_th2_dir()
 			th2_step()
@@ -491,7 +491,7 @@ while True:
 			# than to calculate the next one after each step.
 			next_time2 = nextstep_th2()
 			update_ideal_points(t)
-		# Is it time to step θ₁?
+		# Is it time to step Theta_1?
 		if abs(th1(t)-curr_th1) > th1_inc:
 			set_th1_dir()
 			th1_step()
@@ -521,9 +521,9 @@ while True:
 	print("   Elapsed time:", t )
 	print("   Error:", math.sqrt( (final_cart[0]-end_x)**2 + (final_cart[1]-end_y)**2 ) )
 	print("   Steps:")
-	print("   θ₁:", len(th1_list), "θ₂:", len(th2_list) )
+	print("   Theta_1:", len(th1_list), "Theta_2:", len(th2_list) )
 	print("   Average Frequency:")
-	print("   θ₁:", len(th1_list)/t, "Hz  θ₂:", len(th2_list)/t, "Hz" )
+	print("   Theta_1:", len(th1_list)/t, "Hz  Theta_2:", len(th2_list)/t, "Hz" )
 
 	# Show Graphs
 	update_graphs()
