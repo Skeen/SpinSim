@@ -12,7 +12,7 @@ import sfml as sf			# Graphics library
 import math
 import fractions
 import time
-import argparse
+#import argparse
 
 # Simulation settings
 radius = 100	# Radius of platter
@@ -25,24 +25,24 @@ th1_inc = 2*math.pi / (200*(385/18))	# Platter step increment in radians
 th2_inc = 2*math.pi / (200*(450/18))	# Arm step increment in radians
 
 # Graphics settings
-window_scale = 2
+window_scale = 5
 window_width = 2*radius*window_scale
 window_height = 2*radius*window_scale
 
 # Get options from command line
-cli_parser = argparse.ArgumentParser()
-cli_parser.add_argument( '-t',
-			dest='fake_time', action='store_true', default=False,
-			help='Run simulation in virtual time instead of realtime' )
-cli_parser.add_argument('-d',
-			dest='debug', action='store_true', default=False,
-			help='Debug mode (automatically uses virtual time)' )
-options = cli_parser.parse_args()
+#cli_parser = argparse.ArgumentParser()
+#cli_parser.add_argument( '-t',
+#			dest='fake_time', action='store_true', default=False,
+#			help='Run simulation in virtual time instead of realtime' )
+#cli_parser.add_argument('-d',
+#			dest='debug', action='store_true', default=False,
+#			help='Debug mode (automatically uses virtual time)' )
+#options = cli_parser.parse_args()
 
 # Setup debugger
-if options.debug:
-	import pdb
-	options.fake_time = True
+#if options.debug:
+#	import pdb
+#	options.fake_time = True
 
 # Initialize variables
 # These are all reset in the main loop.
@@ -399,14 +399,40 @@ def nextstep_th1():
 # Draw Center
 draw_cartesian_point( 0,0 , color=sf.Color.WHITE )
 
+## Render code below
+# Steps per mm for the firmware
+steps_per_mm_x = 40;
+steps_per_mm_y = 40;
+# Minimum value (defines lower left corner)
+min_x = -4000/steps_per_mm_x;
+min_y = -4000/steps_per_mm_y;
+# Open the file in argv[1], and parse it as a csv
+import sys
+import csv
+with open(sys.argv[1]) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+		# Read out the X and Y coordinates
+		POS_X = int(row['POS_X']);
+		POS_Y = int(row['POS_Y']);
+		#print("POS_Z" + row['POS_Z']);
+		# Debug print them
+		print(POS_X, POS_Y);
+		# Calculate the cartesian coordinates to render
+		POS_X_CART = POS_X / steps_per_mm_x;
+		POS_Y_CART = POS_Y / steps_per_mm_y;
+		# Draw the point
+	 	draw_cartesian_point(min_x+POS_X_CART, min_y+POS_Y_CART, color=sf.Color.GREEN);
+
 # Get Starting coordinates from mouse
 # And draw them on the screen
-start_cart = start_x,start_y = screen2cart( *get_click() )
-draw_cartesian_point( *start_cart , color=sf.Color.GREEN )
+#start_cart = start_x,start_y = screen2cart( *get_click() )
+#draw_cartesian_point( *start_cart , color=sf.Color.GREEN )
 # Convert starting points to bipolar coordinates
-start_bipol = start_th1,start_th2 = cart2bipol( *start_cart )
+#start_bipol = start_th1,start_th2 = cart2bipol( *start_cart )
 
 # MAIN LOOP
+'''
 while True:
 	# Reset history
 	x_list = []
@@ -539,3 +565,4 @@ while True:
 			window.close()
 			exit()
 	time.sleep(0.01)
+'''
