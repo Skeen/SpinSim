@@ -20,9 +20,9 @@ speed = 40	# Speed in mm/s
 # Stepping increment for each axis (radians/step)
 # = 2*Pi radians / ( motor steps/revolution * gear ratio)
 # = 2*Pi radians / ( 200 steps/rev * (385 teeth / 18 teeth))
-th1_inc = 2*math.pi / (200*(385/18))	# Platter step increment in radians
+th1_inc = 2*math.pi / (200*(40))	# Platter step increment in radians
 # = 2*Pi radians / ( 200 steps/rev * (450 teeth / 18 teeth))
-th2_inc = 2*math.pi / (200*(450/18))	# Arm step increment in radians
+th2_inc = 2*math.pi / (200*(40))	# Arm step increment in radians
 
 # Graphics settings
 window_scale = 5
@@ -163,9 +163,9 @@ def draw_polar_point(theta,r):
 	draw_cartesian_point(x,y,sf.Color.GREEN)
 
 # Draw a point given bipolar coordinates
-def draw_bipolar_point(th1,th2):
+def draw_bipolar_point(th1,th2, color = sf.Color.BLUE):
 	x,y = bipol2cart(th1,th2)
-	draw_cartesian_point(x,y,sf.Color.BLUE)
+	draw_cartesian_point(x,y,color)
 
 # Increment the current position as if stepping a stepper motor
 def th1_step():
@@ -421,8 +421,12 @@ with open(sys.argv[1]) as csvfile:
 		# Calculate the cartesian coordinates to render
 		POS_X_CART = POS_X / steps_per_mm_x;
 		POS_Y_CART = POS_Y / steps_per_mm_y;
+		# Calculate the bipolar coordinates to render
+		POS_X_BIPOLAR = POS_X * th1_inc;
+		POS_Y_BIPOLAR = POS_Y * th2_inc;
 		# Draw the point
-	 	draw_cartesian_point(min_x+POS_X_CART, min_y+POS_Y_CART, color=sf.Color.GREEN);
+	 	#draw_cartesian_point(min_x+POS_X_CART, min_y+POS_Y_CART, color=sf.Color.GREEN);
+		draw_bipolar_point(POS_X_BIPOLAR, POS_Y_BIPOLAR, color=sf.Color.BLUE);
 
 # Get Starting coordinates from mouse
 # And draw them on the screen
